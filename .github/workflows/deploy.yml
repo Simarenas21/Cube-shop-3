@@ -1,7 +1,7 @@
 name: Deploy to GitHub Pages
 on:
   push:
-    branches: [ main ]   # change if your default branch is not 'main'
+    branches: [ main ]
 permissions:
   contents: read
   pages: write
@@ -20,9 +20,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
-      # Use npm ci if lockfile exists, otherwise npm install
+      - name: Show tree & versions
+        run: |
+          node -v
+          npm -v
+          ls -la
+          test -f package.json || (echo "❌ Nerastas package.json repo šaknyje" && exit 1)
+
       - name: Install dependencies
         run: |
           if [ -f package-lock.json ]; then
@@ -33,8 +38,6 @@ jobs:
 
       - name: Build Vite
         env:
-          # If you have a backend on Render, set this to its URL in repo Variables:
-          # Settings > Secrets and variables > Actions > Variables > New variable (VITE_API_BASE)
           VITE_API_BASE: ${{ vars.VITE_API_BASE }}
         run: npm run build
 
