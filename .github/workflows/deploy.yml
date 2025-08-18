@@ -15,11 +15,7 @@ jobs:
         with: { node-version: 18 }
       - run: npm ci
       - run: npm run build
-        env:
-          # Jei jau turi backend Render'e, įrašyk jo URL (palik tuščią, jei kol kas neturi)
-          VITE_API_BASE: https://TAVO-RENDER-API.onrender.com
-      # SPA 404 fallback, kad veiktų gilesni keliai GH Pages
-      - name: Copy 404
+      - name: SPA 404 fallback
         run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
