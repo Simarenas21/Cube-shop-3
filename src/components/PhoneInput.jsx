@@ -1,9 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-/** Minimalus šalių sąrašas (EU + populiarios). Jei reikia visų — tiesiog
- *  PRIDĖKITE į šį masyvą daugiau įrašų (ISO2, pavadinimas, kodas).
- *  Pavyzdžiui, { iso2: 'LT', name: 'Lietuva', dial: '370' }.
- */
+// Trumpas sąrašas; prireikus galiu įkelti pilną ~240 šalių JSON
 const COUNTRIES = [
   { iso2: "LT", name: "Lietuva", dial: "370" },
   { iso2: "LV", name: "Latvija", dial: "371" },
@@ -34,54 +31,28 @@ const COUNTRIES = [
   { iso2: "LU", name: "Liuksemburgas", dial: "352" },
   { iso2: "MT", name: "Malta", dial: "356" },
   { iso2: "CY", name: "Kipras", dial: "357" },
-  // Populiarios ne ES:
+  // keli populiarūs už ES ribų:
   { iso2: "US", name: "JAV", dial: "1" },
   { iso2: "CA", name: "Kanada", dial: "1" },
-  { iso2: "AU", name: "Australija", dial: "61" },
-  { iso2: "NZ", name: "Naujoji Zelandija", dial: "64" },
-  { iso2: "CH", name: "Šveicarija", dial: "41" },
-  { iso2: "IS", name: "Islandija", dial: "354" },
-  { iso2: "UA", name: "Ukraina", dial: "380" },
-  { iso2: "TR", name: "Turkija", dial: "90" },
-  { iso2: "IL", name: "Izraelis", dial: "972" },
-  { iso2: "AE", name: "JAE", dial: "971" },
-  { iso2: "IN", name: "Indija", dial: "91" },
-  { iso2: "SG", name: "Singapūras", dial: "65" },
-  { iso2: "HK", name: "Honkongas", dial: "852" },
-  { iso2: "JP", name: "Japonija", dial: "81" },
-  { iso2: "KR", name: "Pietų Korėja", dial: "82" },
-  { iso2: "TH", name: "Tailandas", dial: "66" },
-  { iso2: "VN", name: "Vietnamas", dial: "84" },
-  { iso2: "MY", name: "Malaizija", dial: "60" },
-  { iso2: "PH", name: "Filipinai", dial: "63" },
-  { iso2: "ID", name: "Indonezija", dial: "62" },
-  { iso2: "MX", name: "Meksika", dial: "52" },
-  { iso2: "BR", name: "Brazilija", dial: "55" },
-  { iso2: "AR", name: "Argentina", dial: "54" },
-  { iso2: "CL", name: "Čilė", dial: "56" },
-  { iso2: "ZA", name: "Pietų Afrika", dial: "27" },
-  { iso2: "EG", name: "Egiptas", dial: "20" },
-  { iso2: "MA", name: "Marokas", dial: "212" },
+  { iso2: "CH", name: "Šveicarija", dial: "41" }
 ];
 
 const flagEmoji = (iso2) =>
-  iso2
-    .toUpperCase()
-    .replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
+  iso2.toUpperCase().replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
 
 export default function PhoneInput({
   name = "phone",
   required = false,
   defaultCountry = "LT",
   initialLocal = "",
-  onChange, // gaus pilną numerį, pvz. +37061234567
+  onChange
 }) {
   const [country, setCountry] = useState(
     COUNTRIES.find((c) => c.iso2 === defaultCountry) || COUNTRIES[0]
   );
   const [local, setLocal] = useState(initialLocal);
 
-  // Pilnas numeris formos siuntimui
+  // Pilna reikšmė formos siuntimui (pvz., +37061234567)
   const full = useMemo(
     () => `+${country.dial}${(local || "").replace(/\D/g, "")}`,
     [country, local]
@@ -93,20 +64,13 @@ export default function PhoneInput({
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 8 }}>
-      {/* Šalies pasirinkimas su kodu */}
-      <label style={{ gridColumn: "1 / -1", fontSize: 12, color: "#64748b" }}>
-        Telefonas
-      </label>
       <select
         aria-label="Šalis"
         value={country.iso2}
-        onChange={(e) =>
-          setCountry(COUNTRIES.find((c) => c.iso2 === e.target.value))
-        }
+        onChange={(e) => setCountry(COUNTRIES.find((c) => c.iso2 === e.target.value))}
         className="input"
-        style={{ padding: "10px", borderRadius: 10 }}
+        style={{ padding: 10, borderRadius: 10 }}
       >
-        {/* Baltijos šalys viršuje */}
         <optgroup label="Baltijos šalys">
           {["LT", "LV", "EE"].map((cc) => {
             const c = COUNTRIES.find((x) => x.iso2 === cc);
@@ -120,17 +84,14 @@ export default function PhoneInput({
           })}
         </optgroup>
         <optgroup label="Kitos">
-          {COUNTRIES.filter((c) => !["LT", "LV", "EE"].includes(c.iso2)).map(
-            (c) => (
-              <option key={c.iso2} value={c.iso2}>
-                {flagEmoji(c.iso2)} {c.name} (+{c.dial})
-              </option>
-            )
-          )}
+          {COUNTRIES.filter((c) => !["LT", "LV", "EE"].includes(c.iso2)).map((c) => (
+            <option key={c.iso2} value={c.iso2}>
+              {flagEmoji(c.iso2)} {c.name} (+{c.dial})
+            </option>
+          ))}
         </optgroup>
       </select>
 
-      {/* Likę skaičiai */}
       <input
         className="input"
         type="tel"
@@ -138,17 +99,13 @@ export default function PhoneInput({
         pattern="[0-9 ]*"
         placeholder="Likę skaičiai (be šalies kodo)"
         value={local}
-        onChange={(e) => {
-          // leidžiam tik skaičius ir tarpus (tarpuose patogiau rinkti)
-          const val = e.target.value.replace(/[^\d ]/g, "");
-          setLocal(val);
-        }}
+        onChange={(e) => setLocal(e.target.value.replace(/[^\d ]/g, ""))}
         required={required}
         autoComplete="tel-national"
-        style={{ padding: "10px", borderRadius: 10 }}
+        style={{ padding: 10, borderRadius: 10 }}
       />
 
-      {/* Paslėptas laukas formos siuntimui – pilna reikšmė kaip +XXX... */}
+      {/* Paslėptas pilnas numeris formos submitui */}
       <input type="hidden" name={name} value={full} />
       <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "#64748b" }}>
         Pilnas numeris: <code>{full}</code>
