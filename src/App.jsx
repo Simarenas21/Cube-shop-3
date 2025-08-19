@@ -143,7 +143,11 @@ export default function App(){
             </div>
             <div>
               <div className="mini">El. paštas</div>
-              <input className="input" type="email" name="email" placeholder="vardenis@pastas.lt" />
+              <input className="input" type="email" name="email" placeholder="vardenis@pastas.lt"
+              required
+              autoComplete="email"
+              onInvalid={(e) => e.target.setCustomValidity('Įveskite galiojantį el. pašto adresą')}
+              onInput={(e) => e.target.setCustomValidity('')} />
             </div>
             <div>
               <div className="mini">Telefonas</div>
