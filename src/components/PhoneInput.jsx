@@ -63,7 +63,8 @@ export default function PhoneInput({
   }, [full, onChange]);
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 8 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "minmax(120px,auto) 1fr", gap: 8 }}>
+
       <select
         aria-label="Šalis"
         value={country.iso2}
