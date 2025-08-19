@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+// src/components/PhoneInput.jsx
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
-// Trumpas sąrašas; prireikus galiu įkelti pilną ~240 šalių JSON
+// Šalių sąrašas (gali plėsti)
 const COUNTRIES = [
   { iso2: "LT", name: "Lietuva", dial: "370" },
   { iso2: "LV", name: "Latvija", dial: "371" },
@@ -31,17 +32,18 @@ const COUNTRIES = [
   { iso2: "LU", name: "Liuksemburgas", dial: "352" },
   { iso2: "MT", name: "Malta", dial: "356" },
   { iso2: "CY", name: "Kipras", dial: "357" },
-  // keli populiarūs už ES ribų:
+  // keli dažnesni už ES ribų
   { iso2: "US", name: "JAV", dial: "1" },
   { iso2: "CA", name: "Kanada", dial: "1" },
   { iso2: "CH", name: "Šveicarija", dial: "41" }
 ];
 
+// 🇱🇹 vėliavos emoji iš ISO2
 const flagEmoji = (iso2) =>
   iso2.toUpperCase().replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
 
 export default function PhoneInput({
-  // name = "phone",
+  name = "phone",
   required = false,
   defaultCountry = "LT",
   initialLocal = "",
@@ -51,6 +53,8 @@ export default function PhoneInput({
     COUNTRIES.find((c) => c.iso2 === defaultCountry) || COUNTRIES[0]
   );
   const [local, setLocal] = useState(initialLocal);
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef(null);
 
   // Pilna reikšmė formos siuntimui (pvz., +37061234567)
   const full = useMemo(
@@ -62,37 +66,89 @@ export default function PhoneInput({
     onChange && onChange(full);
   }, [full, onChange]);
 
+  // uždaryti meniu paspaudus šalia
+  useEffect(() => {
+    function onDocClick(e) {
+      if (!boxRef.current) return;
+      if (!boxRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  // label’ai
+  const selectedLabel = `${flagEmoji(country.iso2)} ${country.iso2} (+${country.dial})`;
+  const optionLabel = (c) => `${flagEmoji(c.iso2)} ${c.name} (+${c.dial})`;
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "minmax(120px,auto) 1fr", gap: 8 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "minmax(160px,auto) 1fr", gap: 8 }}>
+      {/* Custom dropdown */}
+      <div ref={boxRef} style={{ position: "relative" }}>
+        <button
+          type="button"
+          className="input"
+          onClick={() => setOpen((v) => !v)}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          style={{ width: "100%", textAlign: "left", padding: 10, borderRadius: 10 }}
+          title={optionLabel(country)}
+        >
+          {selectedLabel}
+        </button>
 
-      <select
-        aria-label="Šalis"
-        value={country.iso2}
-        onChange={(e) => setCountry(COUNTRIES.find((c) => c.iso2 === e.target.value))}
-        className="input"
-        style={{ padding: 10, borderRadius: 10 }}
-      >
-        <optgroup label="Baltijos šalys">
-          {["LT", "LV", "EE"].map((cc) => {
-            const c = COUNTRIES.find((x) => x.iso2 === cc);
-            return (
-              c && (
-                <option key={c.iso2} value={c.iso2}>
-                  {flagEmoji(c.iso2)} {c.name} (+{c.dial})
-                </option>
-              )
-            );
-          })}
-        </optgroup>
-        <optgroup label="Kitos">
-          {COUNTRIES.filter((c) => !["LT", "LV", "EE"].includes(c.iso2)).map((c) => (
-            <option key={c.iso2} value={c.iso2}>
-              {flagEmoji(c.iso2)} {c.name} (+{c.dial})
-            </option>
-          ))}
-        </optgroup>
-      </select>
+        {open && (
+          <div
+            role="listbox"
+            tabIndex={-1}
+            style={{
+              position: "absolute",
+              zIndex: 20,
+              marginTop: 4,
+              background: "#fff",
+              border: "1px solid #e2e8f0",
+              borderRadius: 10,
+              boxShadow: "0 10px 24px rgba(2,8,23,0.08)",
+              width: "100%",
+              maxHeight: 280,
+              overflowY: "auto"
+            }}
+          >
+            <Group label="Baltijos šalys">
+              {["LT", "LV", "EE"].map((cc) => {
+                const c = COUNTRIES.find((x) => x.iso2 === cc);
+                if (!c) return null;
+                return (
+                  <Option
+                    key={c.iso2}
+                    active={country.iso2 === c.iso2}
+                    label={optionLabel(c)}
+                    onSelect={() => {
+                      setCountry(c);
+                      setOpen(false);
+                    }}
+                  />
+                );
+              })}
+            </Group>
 
+            <Group label="Kitos">
+              {COUNTRIES.filter((c) => !["LT", "LV", "EE"].includes(c.iso2)).map((c) => (
+                <Option
+                  key={c.iso2}
+                  active={country.iso2 === c.iso2}
+                  label={optionLabel(c)}
+                  onSelect={() => {
+                    setCountry(c);
+                    setOpen(false);
+                  }}
+                />
+              ))}
+            </Group>
+          </div>
+        )}
+      </div>
+
+      {/* Likę skaičiai */}
       <input
         className="input"
         type="tel"
@@ -108,9 +164,44 @@ export default function PhoneInput({
 
       {/* Paslėptas pilnas numeris formos submitui */}
       <input type="hidden" name={name} value={full} />
+
+      {/* Debug info – jei nereikia, ištrink */}
       <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "#64748b" }}>
         Pilnas numeris: <code>{full}</code>
       </div>
     </div>
+  );
+}
+
+// Paprasti pagalbiniai komponentai
+function Group({ label, children }) {
+  return (
+    <div style={{ padding: "6px 6px 10px" }}>
+      <div style={{ fontSize: 12, color: "#64748b", padding: "4px 8px" }}>{label}</div>
+      <div>{children}</div>
+    </div>
+  );
+}
+
+function Option({ label, active, onSelect }) {
+  return (
+    <button
+      type="button"
+      role="option"
+      aria-selected={active}
+      onClick={onSelect}
+      className="input"
+      style={{
+        width: "100%",
+        textAlign: "left",
+        padding: "10px 12px",
+        borderRadius: 8,
+        border: "1px solid transparent",
+        background: active ? "#f1f5f9" : "#fff",
+        cursor: "pointer"
+      }}
+    >
+      {label}
+    </button>
   );
 }
