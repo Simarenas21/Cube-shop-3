@@ -151,7 +151,19 @@ export default function App(){
             </div>
             <div>
               <div className="mini">Telefonas</div>
-              <input className="input" name="phone" placeholder="+370 6xx xxxxx" />
+              import PhoneInput from "./components/PhoneInput.jsx";
+
+// ...
+<PhoneInput
+  name="phone"
+  required
+  defaultCountry="LT"
+  onChange={(val) => {
+    // jei nori, gali matyti pilną numerį realiu laiku
+    // console.log('Pilnas numeris:', val)
+  }}
+/>
+
             </div>
             <div>
               <div className="mini">Adresas</div>
