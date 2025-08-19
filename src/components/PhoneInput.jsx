@@ -1,7 +1,7 @@
 // src/components/PhoneInput.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-// Šalių sąrašas (gali plėsti)
+// Šalių sąrašas (plėsk pagal poreikį)
 const COUNTRIES = [
   { iso2: "LT", name: "Lietuva", dial: "370" },
   { iso2: "LV", name: "Latvija", dial: "371" },
@@ -76,13 +76,14 @@ export default function PhoneInput({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  // label’ai
-  const selectedLabel = `${flagEmoji(country.iso2)} ${country.iso2} (+${country.dial})`;
+  // Label’ai
+  const selectedLabel = `${flagEmoji(country.iso2)}`; // ✅ tik vėliava (be ISO ir be kodo)
   const optionLabel = (c) => `${flagEmoji(c.iso2)} ${c.name} (+${c.dial})`;
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "minmax(160px,auto) 1fr", gap: 8 }}>
-      {/* Custom dropdown */}
+    // Kairė – trumpas mygtukas; dešinė – ilgas įvedimo laukas
+    <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 8 }}>
+      {/* Custom dropdown (trumpas trigger’is, platus meniu) */}
       <div ref={boxRef} style={{ position: "relative" }}>
         <button
           type="button"
@@ -90,8 +91,17 @@ export default function PhoneInput({
           onClick={() => setOpen((v) => !v)}
           aria-haspopup="listbox"
           aria-expanded={open}
-          style={{ width: "100%", textAlign: "left", padding: 10, borderRadius: 10 }}
+          // Trumpas mygtukas uždarytas:
+          style={{
+            width: 64,            // ✅ trumputis
+            minWidth: 56,
+            textAlign: "center",  // ✅ centruojam vėliavą
+            padding: "10px 8px",
+            borderRadius: 10
+          }}
+          // Pilnas pavadinimas „title“ (hover) ir screen reader’iui:
           title={optionLabel(country)}
+          aria-label={optionLabel(country)}
         >
           {selectedLabel}
         </button>
@@ -108,8 +118,10 @@ export default function PhoneInput({
               border: "1px solid #e2e8f0",
               borderRadius: 10,
               boxShadow: "0 10px 24px rgba(2,8,23,0.08)",
-              width: "100%",
-              maxHeight: 280,
+              // ✅ meniu platus, nepriklausomai nuo trumpo mygtuko:
+              width: 320,
+              maxWidth: "90vw",
+              maxHeight: 300,
               overflowY: "auto"
             }}
           >
@@ -148,7 +160,7 @@ export default function PhoneInput({
         )}
       </div>
 
-      {/* Likę skaičiai */}
+      {/* Likę skaičiai – ilgas laukas */}
       <input
         className="input"
         type="tel"
@@ -165,7 +177,7 @@ export default function PhoneInput({
       {/* Paslėptas pilnas numeris formos submitui */}
       <input type="hidden" name={name} value={full} />
 
-      {/* Debug info – jei nereikia, ištrink */}
+      {/* Debug info – jei nereikia, galima ištrinti */}
       <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "#64748b" }}>
         Pilnas numeris: <code>{full}</code>
       </div>
