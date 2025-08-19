@@ -204,9 +204,9 @@ export default function App(){
               />
             </div>
 
-            <div>
+            <div style={{ gridColumn: '1 / -1' }}>
               <div className="mini">Telefonas</div>
-              <PhoneInput name="phone" required defaultCountry="LT" /> {/* ✅ tik JSX */}
+              <PhoneInput name="phone" required defaultCountry="LT" />
             </div>
 
             <div>
