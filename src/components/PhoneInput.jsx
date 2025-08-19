@@ -41,7 +41,7 @@ const flagEmoji = (iso2) =>
   iso2.toUpperCase().replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
 
 export default function PhoneInput({
-  name = "phone",
+  // name = "phone",
   required = false,
   defaultCountry = "LT",
   initialLocal = "",
