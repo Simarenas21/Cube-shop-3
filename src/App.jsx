@@ -139,7 +139,7 @@ export default function App(){
             <div>
               <div className="mini">Vardas ir pavardė</div>
               <input className="input" name="name" placeholder="Vardenis Pavardenis" />
-              {submitted && !document.querySelector('input[name=name]').value && <div className="warn">Būtinas laukas</div>}
+              {submitted && !document.querySelector('input[name=name]').value && <div className="warn">Privalomas laukas</div>}
             </div>
             <div>
               <div className="mini">El. paštas</div>
