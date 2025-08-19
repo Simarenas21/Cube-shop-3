@@ -77,7 +77,7 @@ export default function PhoneInput({
   }, []);
 
   // Label’ai
-  const selectedLabel = `${flagEmoji(country.iso2)}`; // ✅ tik vėliava (be ISO ir be kodo)
+  const selectedLabel = `${flagEmoji(country.iso2)} (+${country.dial}) `; // ✅ tik vėliava ir kodas
   const optionLabel = (c) => `${flagEmoji(c.iso2)} ${c.name} (+${c.dial})`;
 
   return (
